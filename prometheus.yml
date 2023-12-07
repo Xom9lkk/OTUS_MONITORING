@@ -1,0 +1,9 @@
+scrape_configs:
+  - job_name: 'node'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.0.103:9100'] 
+  - job name: 'Wordpress node'
+    scraper_interval: 5s
+    static_configs:
+      - targets: ['192.168.106:9100']    

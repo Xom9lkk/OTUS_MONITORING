@@ -1,0 +1,35 @@
+#!/bin/bash
+
+echo "Изменяем hostname VM"
+hostnamectl set-hostname monitoring #название устройства
+systemctl restart systemd-hostnamed #перезапускаем службу
+echo "Отключаем Firewall"
+systemctl disable firewalld #удаляем из автозагрузки firewalld
+systemctl stop firewalld #выключаем firewalld
+echo "Устанавливаем другой Firewall"
+dnf install -q -y iptables-services #устанавливаем iptables 
+cp ./iptables /etc/sysconfig/iptables #копируем требуемые настройки
+systemctl restart iptables #рестартуем службу
+systemctl enable iptables #добавляем в автозагрузку
+echo "Корректируем м сетевые настройки"
+cp ./enp0s3.nmconnection /etc/NetworkManager/system-connections #копируем настройки сервера
+systemctl restart NetworkManager #рестартуем сетевую службу
+echo "Выключение Selinux"
+sed -i 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config  #изменяем положение селинукс
+setenforce 0 #выключаем селинукс
+#установка докера
+echo "Устанавливаем Docker"
+sudo yum install -q -y yum-utils 
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo  #добавляем репозиторий для скачивания
+sudo yum install -q -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+systemctl start docker #стартуем докер
+systemctl enable docker #добавляем в автозагрузку
+echo "Скачиваем образы Prometheus, Grafana, Node-exporter, Mysql"
+docker pull -q prom/prometheus #скачивание докер-образа прометеус
+docker pull -q grafana/grafana #скачивание докер-образа графаны
+docker pull -q prom/node-exporter #скачивание докер-образа node-exporter
+systemctl restart docker
+docker run -d --restart unless-stopped -p 9100:9100 --name=node_exporter prom/node-exporter #создаем контейнер с нод-экспортером
+docker run -d --restart unless-stopped -p 9090:9090 --name=prometheus -v ./prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus #создаем контейер с прометеусом
+docker run -d --restart unless-stopped -p 3000:3000 --name=grafana grafana/grafana #создаем контйенер с графаной
+echo "Подготовка успешно выполнена"
