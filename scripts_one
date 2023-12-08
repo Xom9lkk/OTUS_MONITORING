@@ -3,25 +3,14 @@
 echo "Изменяем hostname VM"
 hostnamectl set-hostname monitoring #название устройства
 systemctl restart systemd-hostnamed #перезапускаем службу
-echo "Отключаем Firewall"
-systemctl disable firewalld #удаляем из автозагрузки firewalld
-systemctl stop firewalld #выключаем firewalld
-echo "Устанавливаем другой Firewall"
-dnf install -q -y iptables-services #устанавливаем iptables 
-cp ./iptables /etc/sysconfig/iptables #копируем требуемые настройки
-systemctl restart iptables #рестартуем службу
-systemctl enable iptables #добавляем в автозагрузку
-echo "Корректируем м сетевые настройки"
-cp ./enp0s3.nmconnection /etc/NetworkManager/system-connections #копируем настройки сервера
-systemctl restart NetworkManager #рестартуем сетевую службу
-echo "Выключение Selinux"
-sed -i 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config  #изменяем положение селинукс
-setenforce 0 #выключаем селинукс
-#установка докера
+sudo apt update
 echo "Устанавливаем Docker"
-sudo yum install -q -y yum-utils 
-sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo  #добавляем репозиторий для скачивания
-sudo yum install -q -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+apt-cache policy docker-ce
+sudo apt install docker-ce
 systemctl start docker #стартуем докер
 systemctl enable docker #добавляем в автозагрузку
 echo "Скачиваем образы Prometheus, Grafana, Node-exporter, Mysql"
