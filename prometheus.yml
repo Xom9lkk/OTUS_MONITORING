@@ -2,4 +2,4 @@ scrape_configs:
   - job_name: 'node'
     scrape_interval: 5s
     static_configs:
-      - targets: ['192.168.0.108:9100']  
+      - targets: ['91.142.72.210:9100']  
