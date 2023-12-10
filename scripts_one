@@ -3,12 +3,17 @@
 echo "Изменяем hostname VM"
 hostnamectl set-hostname monitoring #название устройства
 systemctl restart systemd-hostnamed #перезапускаем службу
-sudo apt update
+echo "Устанавливаем статический IP адрес"
+nmcli connection show
+nmcli con add type ethernet con-name 'static-ip' ifname enp0s3 ipv4.method manual ipv4.addresses 192.168.0.105/24 gw4 192.168.0.1
+nmcli con mod static-ip ipv4.dns 8.8.8.8
+nmcli con up id 'static-ip'
+echo "Применяем правила IPTABLES"
+bash ./rules.v4
 echo "Устанавливаем Docker"
 sudo apt install apt-transport-https ca-certificates curl software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
 apt-cache policy docker-ce
 sudo apt install docker-ce
 systemctl start docker #стартуем докер
@@ -21,4 +26,4 @@ systemctl restart docker
 docker run -d --restart unless-stopped -p 9100:9100 --name=node_exporter prom/node-exporter #создаем контейнер с нод-экспортером
 docker run -d --restart unless-stopped -p 9090:9090 --name=prometheus -v ./prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus #создаем контейер с прометеусом
 docker run -d --restart unless-stopped -p 3000:3000 --name=grafana grafana/grafana #создаем контйенер с графаной
-echo "Подготовка успешно выполнена"
+echo "НАСТРОЙКА ВМ МОНИТОРИНГА ОКОНЧЕНА"

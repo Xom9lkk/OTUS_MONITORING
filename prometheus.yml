@@ -1,5 +1,17 @@
 scrape_configs:
-  - job_name: 'node'
-    scrape_interval: 5s
+  - job_name: 'node_prometheus'
+    scrape_interval: 10s
     static_configs:
-      - targets: ['91.142.72.210:9100']  
+      - targets: ['IP_prometheus:9100']
+  - job_name: 'node_wordpress'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['IP_wp:9100']
+  - job_name: 'node_elk'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['IP_elk:9100']
+  - job_name: 'node_slave'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['IP_slave:9100']
