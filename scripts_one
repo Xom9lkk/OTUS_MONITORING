@@ -19,7 +19,7 @@ apt-cache policy docker-ce
 sudo apt install docker-ce
 systemctl start docker #стартуем докер
 systemctl enable docker #добавляем в автозагрузку
-echo "Скачиваем образы Prometheus, Grafana, Node-exporter, Mysql"
+echo "Скачиваем образы Prometheus, Grafana, Node-exporter"
 docker pull -q prom/prometheus #скачивание докер-образа прометеус
 docker pull -q grafana/grafana #скачивание докер-образа графаны
 docker pull -q prom/node-exporter #скачивание докер-образа node-exporter
